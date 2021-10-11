@@ -136,6 +136,20 @@ public class OfflineSegmentIntervalChecker extends ControllerPeriodicTask<Void> 
     _validationMetrics.updateSegmentCountGauge(offlineTableName, numSegments);
   }
 
+  @Override
+  protected void nonLeaderCleanup(List<String> tableNamesWithType) {
+    for (String tableNameWithType : tableNamesWithType) {
+      TableType tableType = TableNameBuilder.getTableTypeFromTableName(tableNameWithType);
+      if (tableType == TableType.OFFLINE) {
+        _validationMetrics.cleanupMissingSegmentCountGauge(tableNameWithType);
+        _validationMetrics.cleanupOfflineSegmentDelayGauge(tableNameWithType);
+        _validationMetrics.cleanupLastPushTimeGauge(tableNameWithType);
+        _validationMetrics.cleanupTotalDocumentCountGauge(tableNameWithType);
+        _validationMetrics.cleanupSegmentCountGauge(tableNameWithType);
+      }
+    }
+  }
+
   /**
    * Computes the number of missing segments based on the given existing segment intervals and the expected frequency
    * of the intervals.
